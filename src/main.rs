@@ -32,8 +32,15 @@ impl EventHandler for Handler{
 
             let execute = match cmd{
                 "echo" => {
-                    let res = if args==""{"no arguments found"} else {args};
+                    let res = if args==""{"no arguments found"} else {
+                        if args.contains("@") {
+                            "nono"
+                            
+                            
+                        } else {args}
+                    };
                     msg.channel_id.say(ctx.http, res)
+                    
                 },
                 //"storage" => msg.channel_id.say(ctx.http, content),
                 "copypasta" => msg.channel_id.say(ctx.http,self.data.copypasta[rand::thread_rng().gen_range(0..self.data.copypasta.len()-1)].as_str()),
