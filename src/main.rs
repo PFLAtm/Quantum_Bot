@@ -46,7 +46,22 @@ impl EventHandler for Handler{
                             "❌".to_string()
 
                         } else if args.contains(">") {
-                            args.replace(">", "")
+                            let mut rec = 0;
+                            let mut res=String::from("something went wrong :(");
+                            for (i,v) in args.as_bytes().iter().enumerate() {
+                                if v == &b'>' {
+                                    rec +=1;
+                                }
+                                if  rec >= 6{
+                                    let (with_rec,no_rec) = args.split_at(i-1);
+                                    res = with_rec.to_string();
+                                    res.push_str(&no_rec.replace(">", ""));
+                                    break;
+                                } else {
+                                    res = args.to_string();
+                                }
+                            }
+                            res
                         } 
                         else {
                             args.to_string()
@@ -72,7 +87,7 @@ impl EventHandler for Handler{
     }
 
     async fn guild_member_addition(&self, ctx:Context, mem:Member){
-        ChannelId::new(self.data.welcome_channel_id).say(ctx.http, format!("welcome {} to Quantum!",mem.nick.unwrap_or("".to_string()))).await.unwrap();
+        ChannelId::new(self.data.welcome_channel_id).say(ctx.http, format!("welcome {} to Quantum!",mem.mention())).await.unwrap();
     }
 
     async fn ready(&self, _: Context, ready: Ready) {
