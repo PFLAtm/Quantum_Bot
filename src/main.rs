@@ -36,7 +36,7 @@ impl EventHandler for Handler{
                     msg.channel_id.say(ctx.http, res)
                 },
                 //"storage" => msg.channel_id.say(ctx.http, content),
-                "copypasta" => msg.channel_id.say(ctx.http,self.data.copypasta[rand::thread_rng().gen_range(0..self.data.copypasta.len())].as_str()),
+                "copypasta" => msg.channel_id.say(ctx.http,self.data.copypasta[rand::thread_rng().gen_range(0..self.data.copypasta.len()-1)].as_str()),
                 _ => msg.channel_id.say(ctx.http,"unknown command"),
             };
 
