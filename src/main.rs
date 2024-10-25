@@ -1,7 +1,16 @@
 use std::{fs::File, io::Read};
-use rand::{Rng};
 use serde::Deserialize;
 use serenity::{all::{ ChannelId, Member, Message, Reaction, Ready}, async_trait, prelude::*};
+
+
+const JOKE_URL:&'static str = "https://v2.jokeapi.dev/joke/Programming,Miscellaneous,Pun?blacklistFlags=nsfw,religious,political,racist,sexist,explicit&format=txt";
+const HELP:&'static str = "### commands
+
+- echo: repeats the given argument
+- joke: prints a (hopefully) funny joke
+- help: shows this text"
+;
+
 
 #[derive(Deserialize)]
 struct Data{
@@ -9,7 +18,6 @@ struct Data{
     verified_emoji: String,
     verified_role_id: u64,
     welcome_channel_id: u64,
-    copypasta: Vec<String>,
 }
 
 struct Handler{
@@ -31,20 +39,30 @@ impl EventHandler for Handler{
             
 
             let execute = match cmd{
+                "help" => msg.channel_id.say(ctx.http, HELP.to_string()),
                 "echo" => {
-                    let res = if args==""{"no arguments found"} else {
+                    let res = if args==""{"no arguments found".to_string()} else {
                         if args.contains("@") {
-                            "nono"
-                            
-                            
-                        } else {args}
+                            "❌".to_string()
+
+                        } else if args.contains(">") {
+                            args.replace(">", "")
+                        } 
+                        else {
+                            args.to_string()
+                        }
+                        
                     };
                     msg.channel_id.say(ctx.http, res)
                     
                 },
                 //"storage" => msg.channel_id.say(ctx.http, content),
-                "copypasta" => msg.channel_id.say(ctx.http,self.data.copypasta[rand::thread_rng().gen_range(0..self.data.copypasta.len()-1)].as_str()),
-                _ => msg.channel_id.say(ctx.http,"unknown command"),
+                "copypasta" => msg.channel_id.say(ctx.http,"CA said no :(".to_string()),
+                "joke" => {
+                    let joke = reqwest::get(JOKE_URL).await.expect("joke api call failed").text().await.unwrap();
+                    msg.channel_id.say(ctx.http,joke)
+                },
+                _ => msg.channel_id.say(ctx.http,"unknown command".to_string()),
             };
 
             execute.await.unwrap();

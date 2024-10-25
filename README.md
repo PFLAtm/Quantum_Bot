@@ -10,6 +10,8 @@ arguments have to be seperated by a space
 ### commands
 
 - echo: repeats the given argument
+- joke: prints a (hopefully) funny joke
+- help: shows this text
 
 ### other features
 

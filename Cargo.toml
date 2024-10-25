@@ -11,3 +11,4 @@ tokio = {version="*",features=["full"]}
 toml = "*"
 serde = {version = "*",features = ["derive"]}
 rand = "*"
+reqwest = "*"
