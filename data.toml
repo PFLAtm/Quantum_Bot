@@ -1,5 +1,6 @@
 verified_message_id = 1299380119848353924
 verified_emoji = "✅"
-verified_role_id = 1299385080061366282
+verified_role_id = 1299385080061366282 
 welcome_channel_id = 1294802130938626089
 admin_role_id = 1299649349122527264
+bot_role_id = 1299651101695676460

@@ -22,6 +22,7 @@ struct Data{
     verified_role_id: u64,
     welcome_channel_id: u64,
     admin_role_id: u64,
+    bot_role_id: u64,
 }
 
 struct Handler{
@@ -40,12 +41,13 @@ impl EventHandler for Handler{
         if msg.content.starts_with(">"){
             let cmd = &msg.content[1..msg.content.find(" ").unwrap_or_else(||msg.content.len())];
             let args = &msg.content[msg.content.find(" ").unwrap_or_else(||cmd.len()+1)..msg.content.len()];
-            let is_admin = msg.author.has_role(ctx.http.clone(), msg.guild_id.unwrap(), self.data.admin_role_id).await.unwrap();
+            let is_admin = msg.author.has_role(ctx.http.clone(), msg.guild_id.unwrap(), self.data.admin_role_id).await.unwrap(); 
+            let is_bot = msg.author.has_role(ctx.http.clone(), msg.guild_id.unwrap(), self.data.bot_role_id).await.unwrap();
             
 
             let execute = match cmd{
                 "help" => msg.channel_id.say(ctx.http, HELP.to_string()),
-                "echo" if is_admin => {
+                "echo" if is_admin || is_bot => {
                     let res = if args==""{"no arguments found".to_string()} else {
                         if args.contains("@") {
                             "❌".to_string()
@@ -82,6 +84,13 @@ impl EventHandler for Handler{
                 "joke" => {
                     let joke = reqwest::get(JOKE_URL).await.expect("joke api call failed").text().await.unwrap();
                     msg.channel_id.say(ctx.http,joke)
+                },
+                "verify-all" if is_admin => {
+                    let members = msg.guild_id.unwrap().members(ctx.http.clone(), None, None).await.unwrap();
+                    for member in members {
+                        member.add_role(ctx.http.clone(), self.data.verified_role_id).await.expect("add role in loop failed");
+                    }
+                    msg.channel_id.say(ctx.http,"done".to_string())
                 },
                 _ => msg.channel_id.say(ctx.http,"unknown command".to_string()),
             };
