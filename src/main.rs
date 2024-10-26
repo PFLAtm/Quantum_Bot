@@ -1,4 +1,5 @@
 use std::{fs::File, io::Read};
+use rand::Rng;
 use serde::Deserialize;
 use serenity::{all::{ ChannelId, Member, Message, Reaction, Ready}, async_trait, prelude::*};
 
@@ -15,14 +16,17 @@ const HELP:&'static str =
 ;
 
 
+
+
 #[derive(Deserialize)]
 struct Data{
     verified_message_id: u64,
     verified_emoji: String,
     verified_role_id: u64,
     welcome_channel_id: u64,
-    admin_role_id: u64,
+    bot_permission_role_id: u64,
     bot_role_id: u64,
+    rules_channel_id: u64,
 }
 
 struct Handler{
@@ -41,13 +45,13 @@ impl EventHandler for Handler{
         if msg.content.starts_with(">"){
             let cmd = &msg.content[1..msg.content.find(" ").unwrap_or_else(||msg.content.len())];
             let args = &msg.content[msg.content.find(" ").unwrap_or_else(||cmd.len()+1)..msg.content.len()];
-            let is_admin = msg.author.has_role(ctx.http.clone(), msg.guild_id.unwrap(), self.data.admin_role_id).await.unwrap(); 
+            let has_permision = msg.author.has_role(ctx.http.clone(), msg.guild_id.unwrap(), self.data.bot_permission_role_id).await.unwrap(); 
             let is_bot = msg.author.has_role(ctx.http.clone(), msg.guild_id.unwrap(), self.data.bot_role_id).await.unwrap();
             
 
             let execute = match cmd{
                 "help" => msg.channel_id.say(ctx.http, HELP.to_string()),
-                "echo" if is_admin || is_bot => {
+                "echo" if has_permision || is_bot => {
                     let res = if args==""{"no arguments found".to_string()} else {
                         if args.contains("@") {
                             "❌".to_string()
@@ -85,7 +89,7 @@ impl EventHandler for Handler{
                     let joke = reqwest::get(JOKE_URL).await.expect("joke api call failed").text().await.unwrap();
                     msg.channel_id.say(ctx.http,joke)
                 },
-                "verify-all" if is_admin => {
+                "verify-all" if has_permision => {
                     let members = msg.guild_id.unwrap().members(ctx.http.clone(), None, None).await.unwrap();
                     for member in members {
                         member.add_role(ctx.http.clone(), self.data.verified_role_id).await.expect("add role in loop failed");
@@ -102,11 +106,12 @@ impl EventHandler for Handler{
     }
 
     async fn guild_member_addition(&self, ctx:Context, mem:Member){
-        ChannelId::new(self.data.welcome_channel_id).say(ctx.http, format!("welcome {} to Quantum!",mem.mention())).await.unwrap();
+        let greetings = vec!["Welcome to the quantic party ", "Welcome to Quantum "];
+        ChannelId::new(self.data.welcome_channel_id).say(ctx.http, format!("{}{}! make sure to check the rules in <#{}>",greetings[rand::thread_rng().gen_range(0..greetings.len())],mem.mention(),self.data.rules_channel_id)).await.unwrap();
     }
 
     async fn ready(&self, _: Context, ready: Ready) {
-        println!("{} is connected!", ready.user.name);
+        println!("{} is online!", ready.user.name);
     }
 
     async fn reaction_add (&self, ctx:Context, rct:Reaction) {
