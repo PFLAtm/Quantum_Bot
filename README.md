@@ -4,7 +4,7 @@ this Bot is currently under development and lacks a lot features atm
 
 ## features
 
-all commands need to start with a ">"!
+all commands need to start with a ">"!  
 arguments have to be seperated by a space
 
 ### commands
