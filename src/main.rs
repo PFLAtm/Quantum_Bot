@@ -4,11 +4,14 @@ use serenity::{all::{ ChannelId, Member, Message, Reaction, Ready}, async_trait,
 
 
 const JOKE_URL:&'static str = "https://v2.jokeapi.dev/joke/Programming,Miscellaneous,Pun?blacklistFlags=nsfw,religious,political,racist,sexist,explicit&format=txt";
-const HELP:&'static str = "### commands
+const HELP:&'static str = 
+"### commands
 
 - echo: repeats the given argument
 - joke: prints a (hopefully) funny joke
 - help: shows this text"
+
+
 ;
 
 
@@ -18,6 +21,7 @@ struct Data{
     verified_emoji: String,
     verified_role_id: u64,
     welcome_channel_id: u64,
+    admin_role_id: u64,
 }
 
 struct Handler{
@@ -36,11 +40,12 @@ impl EventHandler for Handler{
         if msg.content.starts_with(">"){
             let cmd = &msg.content[1..msg.content.find(" ").unwrap_or_else(||msg.content.len())];
             let args = &msg.content[msg.content.find(" ").unwrap_or_else(||cmd.len()+1)..msg.content.len()];
+            let is_admin = msg.author.has_role(ctx.http.clone(), msg.guild_id.unwrap(), self.data.admin_role_id).await.unwrap();
             
 
             let execute = match cmd{
                 "help" => msg.channel_id.say(ctx.http, HELP.to_string()),
-                "echo" => {
+                "echo" if is_admin => {
                     let res = if args==""{"no arguments found".to_string()} else {
                         if args.contains("@") {
                             "❌".to_string()
@@ -71,6 +76,7 @@ impl EventHandler for Handler{
                     msg.channel_id.say(ctx.http, res)
                     
                 },
+                "echo" => msg.channel_id.say(ctx.http,"insufficient permisions".to_string()),
                 //"storage" => msg.channel_id.say(ctx.http, content),
                 "copypasta" => msg.channel_id.say(ctx.http,"CA said no :(".to_string()),
                 "joke" => {
