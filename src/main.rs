@@ -1,4 +1,4 @@
-use std::{fs::File, io::Read};
+use std::{fs::OpenOptions, io::{Read, Write}, process};
 use rand::Rng;
 use serde::Deserialize;
 use serde_json::Value;
@@ -8,9 +8,10 @@ use serenity::{all::{ ChannelId, CreateAttachment, CreateMessage, Member, Messag
 
 
 
+
 const JOKE_URL:&'static str = "https://v2.jokeapi.dev/joke/Programming,Miscellaneous,Pun?blacklistFlags=nsfw,religious,political,racist,sexist,explicit&format=txt";
 const STATUS_URL:&'static str ="https://api.mcsrvstat.us/3/";
-const SKIN_URL:&'static str= "https://mc-heads.net/avatar/";
+const SKIN_URL:&'static str = "https://mc-heads.net/avatar/";
 const HELP:&'static str = 
 "### commands
 
@@ -22,6 +23,19 @@ const HELP:&'static str =
 - copypasta: prints random copypasta
 - status: prints quantum server status
 - avatar: prints the head of the specified player skin
+";
+
+const DEFAULT_DATA:&'static str =
+"
+#put words in double quotes
+verified_message_id = 
+verified_emoji =
+verified_role_id =
+welcome_channel_id =
+bot_permission_role_id =
+rules_channel_id =
+copypasta = [copypasta_one,copypaste_two,...]
+server_ip = [server_ip_one,server_ip_two,...]
 ";
 
 
@@ -151,7 +165,7 @@ impl EventHandler for Handler{
         }
     }
 
-    //todo: mc server api 
+    
     //todo: mojang api
 
     async fn guild_member_addition(&self, ctx:Context, mem:Member){
@@ -175,14 +189,27 @@ async fn main() {
     let intents = GatewayIntents::GUILD_MESSAGES
         | GatewayIntents::DIRECT_MESSAGES
         | GatewayIntents::MESSAGE_CONTENT | GatewayIntents::MESSAGE_CONTENT | GatewayIntents::GUILD_MESSAGE_REACTIONS | GatewayIntents::GUILD_MEMBERS;
-
+    
+    //token loading
+    let mut token_file = OpenOptions::new().read(true).write(true).create(true).open("token.txt").expect("token.txt open failed");
     let mut token = String::new();
+    
+    token_file.read_to_string(&mut token).expect("token read failed");
+
+    //data loading
+    let mut data_file = OpenOptions::new().create(true).write(true).read(true).open("data.toml").expect("data.toml open failed");
     let mut data_string = String::new();
-    File::open("token.txt").expect("no token file").read_to_string(&mut token).expect("file read failed");
-    File::open("data.toml").expect("no data toml file").read_to_string(&mut data_string).expect("file read failed");
 
-    let data:Data = toml::from_str(&data_string).expect("deserilazation of data failed");
+    data_file.read_to_string(&mut data_string).expect("data read failed");  
 
+    let data:Data = toml::from_str(&data_string).unwrap_or_else(|_|{
+        println!("linesin:{}, lines default: {}",data_string.lines().count(),DEFAULT_DATA.lines().count());
+        data_file.write_all(DEFAULT_DATA[data_string.len()..DEFAULT_DATA.len()].as_bytes()).expect("data.toml update failed");
+        println!("please update data.toml");
+        process::exit(1);
+    });
+
+    //client loop
     let mut client = Client::builder(token, intents).event_handler(Handler::new(data)).await.expect("building client failed");
 
     if let Err(e) = client.start().await {
