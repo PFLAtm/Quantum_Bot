@@ -29,6 +29,7 @@ arguments have to be seperated by a space
 - download the Quantum_Bot.exe from Releases page
 - run it (preferred from command line so you can see the output)
 - put your bot token in the created token.txt file
+- run it again
 - fill out the data.toml file (more info in the data config section)
 - run it again
 

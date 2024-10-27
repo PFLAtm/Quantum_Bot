@@ -26,17 +26,16 @@ const HELP:&'static str =
 ";
 
 const DEFAULT_DATA:&'static str =
-"
-#put words in double quotes
-verified_message_id = 
-verified_emoji =
-verified_role_id =
-welcome_channel_id =
-bot_permission_role_id =
-rules_channel_id =
-copypasta = [copypasta_one,copypaste_two,...]
-server_ip = [server_ip_one,server_ip_two,...]
-";
+"#put Strings in double quotes
+verified_message_id = 123456789 
+verified_emoji = ✏️
+verified_role_id = 123456789
+welcome_channel_id = 123456789
+bot_permission_role_id = 123456789
+rules_channel_id = 123456789
+copypasta = [copypasta1,copypaste2,...]
+server_ip = [server_ip1,server_ip2,...]
+greetings = [greeting1,greeting2,...]";
 
 
 
@@ -51,6 +50,7 @@ struct Data{
     rules_channel_id: u64,
     copypasta: Vec<String>,
     server_ip: Vec<String>,
+    greetings: Vec<String>,
 }
 
 struct Handler{
@@ -169,8 +169,7 @@ impl EventHandler for Handler{
     //todo: mojang api
 
     async fn guild_member_addition(&self, ctx:Context, mem:Member){
-        let greetings = vec!["Welcome to the quantic party ", "Welcome to Quantum "];
-        ChannelId::new(self.data.welcome_channel_id).say(ctx.http, format!("{}{}! make sure to check the rules in <#{}>",greetings[rand::thread_rng().gen_range(0..greetings.len())],mem.mention(),self.data.rules_channel_id)).await.unwrap();
+        ChannelId::new(self.data.welcome_channel_id).say(ctx.http, format!("{}{}! make sure to check the rules in <#{}>",self.data.greetings[rand::thread_rng().gen_range(0..self.data.greetings.len())],mem.mention(),self.data.rules_channel_id)).await.unwrap();
     }
 
     async fn ready(&self, _: Context, ready: Ready) {
@@ -204,11 +203,23 @@ async fn main() {
     let mut data_file = OpenOptions::new().create(true).write(true).read(true).open("data.toml").expect("data.toml open failed");
     let mut data_string = String::new();
 
-    data_file.read_to_string(&mut data_string).expect("data read failed");  
+    data_file.read_to_string(&mut data_string).expect("data read failed");
+    if data_string=="" {
+        data_file.write_all(DEFAULT_DATA.as_bytes()).unwrap();
+        data_file.read_to_string(&mut data_string).expect("data read failed");
+    }
 
     let data:Data = toml::from_str(&data_string).unwrap_or_else(|_|{
-        println!("linesin:{}, lines default: {}",data_string.lines().count(),DEFAULT_DATA.lines().count());
-        data_file.write_all(DEFAULT_DATA[data_string.len()..DEFAULT_DATA.len()].as_bytes()).expect("data.toml update failed");
+        let amount = DEFAULT_DATA.lines().enumerate().last().unwrap().0-(DEFAULT_DATA.lines().enumerate().last().unwrap().0-data_string.lines().enumerate().last().unwrap().0);
+        let mut lines = DEFAULT_DATA.lines();
+        for _ in 0..amount+1 {
+            lines.next();
+        }
+       
+        let mut write_str = String::new();
+        lines.for_each(|s|{write_str.push_str(&format!("\n{s}"));});
+        
+        data_file.write_all(format!("\n{}",write_str).as_bytes()).expect("data.toml update failed");
         println!("please update data.toml");
         process::exit(1);
     });
