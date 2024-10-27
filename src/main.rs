@@ -27,6 +27,7 @@ struct Data{
     bot_permission_role_id: u64,
     bot_role_id: u64,
     rules_channel_id: u64,
+    copypasta: Vec<String>,
 }
 
 struct Handler{
@@ -83,8 +84,8 @@ impl EventHandler for Handler{
                     
                 },
                 "echo" => msg.channel_id.say(ctx.http,"insufficient permisions".to_string()),
-                //"storage" => msg.channel_id.say(ctx.http, content),
-                "copypasta" => msg.channel_id.say(ctx.http,"CA said no :(".to_string()),
+                "storage" => msg.channel_id.say(ctx.http,"text <@1166088970279583874>".to_string()),
+                "copypasta" => msg.channel_id.say(ctx.http,self.data.copypasta[rand::thread_rng().gen_range(0..self.data.copypasta.len())].to_string()),
                 "joke" => {
                     let joke = reqwest::get(JOKE_URL).await.expect("joke api call failed").text().await.unwrap();
                     msg.channel_id.say(ctx.http,joke)
