@@ -1,6 +1,7 @@
 use std::{fs::File, io::Read};
 use rand::Rng;
 use serde::Deserialize;
+use serde_json::Value;
 use serde_with::chrono::TimeDelta;
 use serenity::{all::{ ChannelId, Member, Message, Reaction, Ready, Timestamp}, async_trait, prelude::*};
 
@@ -8,6 +9,7 @@ use serenity::{all::{ ChannelId, Member, Message, Reaction, Ready, Timestamp}, a
 
 
 const JOKE_URL:&'static str = "https://v2.jokeapi.dev/joke/Programming,Miscellaneous,Pun?blacklistFlags=nsfw,religious,political,racist,sexist,explicit&format=txt";
+const STATUS_URL:&'static str ="https://api.mcsrvstat.us/3/";
 const HELP:&'static str = 
 "### commands
 
@@ -17,6 +19,7 @@ const HELP:&'static str =
 - timeout: puts user in 5min timeout
 - new-ms: reminds CA that a new ms has to be build
 - copypasta: prints random copypasta
+- status: prints quantum server status
 ";
 
 
@@ -29,9 +32,9 @@ struct Data{
     verified_role_id: u64,
     welcome_channel_id: u64,
     bot_permission_role_id: u64,
-    bot_role_id: u64,
     rules_channel_id: u64,
     copypasta: Vec<String>,
+    server_ip: Vec<String>,
 }
 
 struct Handler{
@@ -112,6 +115,17 @@ impl EventHandler for Handler{
                     let time = Timestamp::now().checked_add_signed(TimeDelta::minutes(5)).unwrap().to_rfc3339();
                     msg.member(ctx.http.clone()).await.unwrap().disable_communication_until_datetime(ctx.http, Timestamp::parse(&time).unwrap()).await.unwrap();
                     None
+                },
+
+                "status" => {
+                    let mut res = String::new();
+                    for ip in self.data.server_ip.iter() {
+                        let raw_json:Value = serde_json::from_str(&reqwest::get(format!("{}{}",STATUS_URL,ip)).await.expect("status api call failed").text().await.unwrap()).expect("json parse failed");
+                        let name = raw_json["motd"]["clean"].to_string();
+                        res.push_str(&format!("### {}\nstatus: {}\nplayers: {}\n",&name[2..name.len()-2],if raw_json["online"]==true{"online"}else{"offline"},raw_json["players"]["online"]));
+                    }
+                    Some(msg.channel_id.say(ctx.http, res))
+                    
                 },
 
                 _ => Some(msg.channel_id.say(ctx.http,"unknown command".to_string())),
