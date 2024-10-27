@@ -195,6 +195,10 @@ async fn main() {
     let mut token = String::new();
     
     token_file.read_to_string(&mut token).expect("token read failed");
+    if token == ""{
+        println!("please put bot token in token.txt");
+        process::exit(1);
+    };
 
     //data loading
     let mut data_file = OpenOptions::new().create(true).write(true).read(true).open("data.toml").expect("data.toml open failed");
