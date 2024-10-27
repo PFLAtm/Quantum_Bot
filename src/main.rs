@@ -1,7 +1,10 @@
 use std::{fs::File, io::Read};
 use rand::Rng;
 use serde::Deserialize;
-use serenity::{all::{ ChannelId, Member, Message, Reaction, Ready}, async_trait, prelude::*};
+use serde_with::chrono::TimeDelta;
+use serenity::{all::{ ChannelId, Member, Message, Reaction, Ready, Timestamp}, async_trait, prelude::*};
+
+
 
 
 const JOKE_URL:&'static str = "https://v2.jokeapi.dev/joke/Programming,Miscellaneous,Pun?blacklistFlags=nsfw,religious,political,racist,sexist,explicit&format=txt";
@@ -10,10 +13,11 @@ const HELP:&'static str =
 
 - echo: repeats the given argument
 - joke: prints a (hopefully) funny joke
-- help: shows this text"
-
-
-;
+- help: shows this text
+- timeout: puts user in 5min timeout
+- new-ms: reminds CA that a new ms has to be build
+- copypasta: prints random copypasta
+";
 
 
 
@@ -47,11 +51,12 @@ impl EventHandler for Handler{
             let cmd = &msg.content[1..msg.content.find(" ").unwrap_or_else(||msg.content.len())];
             let args = &msg.content[msg.content.find(" ").unwrap_or_else(||cmd.len()+1)..msg.content.len()];
             let has_permission = msg.author.has_role(ctx.http.clone(), msg.guild_id.unwrap(), self.data.bot_permission_role_id).await.unwrap(); 
-            let is_bot = msg.author.has_role(ctx.http.clone(), msg.guild_id.unwrap(), self.data.bot_role_id).await.unwrap();
+            let is_bot = msg.author.bot;
             
 
             let execute = match cmd{
-                "help" => msg.channel_id.say(ctx.http, HELP.to_string()),
+                "help" => Some(msg.channel_id.say(ctx.http, HELP.to_string())),
+
                 "echo" if has_permission || is_bot => {
                     let res = if args==""{"no arguments found".to_string()} else {
                         if args.contains("@") {
@@ -80,31 +85,47 @@ impl EventHandler for Handler{
                         }
                         
                     };
-                    msg.channel_id.say(ctx.http, res)
+                    Some(msg.channel_id.say(ctx.http, res))
                     
                 },
-                "echo" => msg.channel_id.say(ctx.http,"insufficient permisions".to_string()),
-                "storage" => msg.channel_id.say(ctx.http,"text <@1166088970279583874>".to_string()),
-                "copypasta" => msg.channel_id.say(ctx.http,self.data.copypasta[rand::thread_rng().gen_range(0..self.data.copypasta.len())].to_string()),
+
+                "echo" => Some(msg.channel_id.say(ctx.http,"insufficient permisions".to_string())),
+
+                "new-ms" => Some(msg.channel_id.say(ctx.http,"<@1166088970279583874> when can we build new ms? \n -block on block".to_string())),
+
+                "copypasta" => Some(msg.channel_id.say(ctx.http,self.data.copypasta[rand::thread_rng().gen_range(0..self.data.copypasta.len())].to_string())),
+
                 "joke" => {
                     let joke = reqwest::get(JOKE_URL).await.expect("joke api call failed").text().await.unwrap();
-                    msg.channel_id.say(ctx.http,joke)
+                    Some(msg.channel_id.say(ctx.http,joke))
                 },
+
                 "verify-all" if has_permission => {
                     let members = msg.guild_id.unwrap().members(ctx.http.clone(), None, None).await.unwrap();
                     for member in members {
                         member.add_role(ctx.http.clone(), self.data.verified_role_id).await.expect("add role in loop failed");
                     }
-                    msg.channel_id.say(ctx.http,"done".to_string())
+                    Some(msg.channel_id.say(ctx.http,"done".to_string()))
                 },
-                _ => msg.channel_id.say(ctx.http,"unknown command".to_string()),
+
+                "timeout" if !is_bot=> {
+                    let time = Timestamp::now().checked_add_signed(TimeDelta::minutes(5)).unwrap().to_rfc3339();
+                    msg.member(ctx.http.clone()).await.unwrap().disable_communication_until_datetime(ctx.http, Timestamp::parse(&time).unwrap()).await.unwrap();
+                    None
+                },
+
+                _ => Some(msg.channel_id.say(ctx.http,"unknown command".to_string())),
             };
 
-            execute.await.unwrap();
-        
+            if let Some(e) = execute{
+                e.await.unwrap();
+            }        
         
         }
     }
+
+    //todo: mc server api 
+    //todo: mojang api
 
     async fn guild_member_addition(&self, ctx:Context, mem:Member){
         let greetings = vec!["Welcome to the quantic party ", "Welcome to Quantum "];

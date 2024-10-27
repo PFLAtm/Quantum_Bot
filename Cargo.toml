@@ -12,3 +12,5 @@ toml = "*"
 serde = {version = "*",features = ["derive"]}
 rand = "*"
 reqwest = "*"
+serde_with = {version = "*", features = ["chrono"]}
+serde_json = "1.0.132"
