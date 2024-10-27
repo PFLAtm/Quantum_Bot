@@ -12,7 +12,11 @@ arguments have to be seperated by a space
 - echo: repeats the given argument
 - joke: prints a (hopefully) funny joke
 - help: shows this text
+- verify-all: gives a verified role to everyone
+- copypasta: prints a random copypasta from a given selection
+- timeout:
 
 ### other features
 
 - adds reaction roles
+- welcomes new members

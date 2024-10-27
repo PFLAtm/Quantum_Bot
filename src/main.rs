@@ -45,13 +45,13 @@ impl EventHandler for Handler{
         if msg.content.starts_with(">"){
             let cmd = &msg.content[1..msg.content.find(" ").unwrap_or_else(||msg.content.len())];
             let args = &msg.content[msg.content.find(" ").unwrap_or_else(||cmd.len()+1)..msg.content.len()];
-            let has_permision = msg.author.has_role(ctx.http.clone(), msg.guild_id.unwrap(), self.data.bot_permission_role_id).await.unwrap(); 
+            let has_permission = msg.author.has_role(ctx.http.clone(), msg.guild_id.unwrap(), self.data.bot_permission_role_id).await.unwrap(); 
             let is_bot = msg.author.has_role(ctx.http.clone(), msg.guild_id.unwrap(), self.data.bot_role_id).await.unwrap();
             
 
             let execute = match cmd{
                 "help" => msg.channel_id.say(ctx.http, HELP.to_string()),
-                "echo" if has_permision || is_bot => {
+                "echo" if has_permission || is_bot => {
                     let res = if args==""{"no arguments found".to_string()} else {
                         if args.contains("@") {
                             "❌".to_string()
@@ -89,7 +89,7 @@ impl EventHandler for Handler{
                     let joke = reqwest::get(JOKE_URL).await.expect("joke api call failed").text().await.unwrap();
                     msg.channel_id.say(ctx.http,joke)
                 },
-                "verify-all" if has_permision => {
+                "verify-all" if has_permission => {
                     let members = msg.guild_id.unwrap().members(ctx.http.clone(), None, None).await.unwrap();
                     for member in members {
                         member.add_role(ctx.http.clone(), self.data.verified_role_id).await.expect("add role in loop failed");
