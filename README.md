@@ -14,7 +14,8 @@ arguments have to be seperated by a space
 - help: shows this text
 - verify-all: gives a verified role to everyone
 - copypasta: prints a random copypasta from a given selection
-- timeout:
+- timeout: timeouts the sender for 5 min
+- avatar: sends the head of the specified player skin
 
 ### other features
 
