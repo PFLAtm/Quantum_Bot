@@ -155,6 +155,11 @@ impl EventHandler for Handler{
                     }
                 },
 
+                "stop" if has_permission => {
+                    println!("stopping...");
+                    process::exit(0)
+                },
+
                 _ => Some(msg.channel_id.say(ctx.http,"unknown command".to_string())),
             };
 
