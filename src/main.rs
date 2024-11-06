@@ -159,6 +159,7 @@ impl EventHandler for Handler{
                     println!("stopping...");
                     process::exit(0)
                 },
+                "" => None,
 
                 _ => Some(msg.channel_id.say(ctx.http,"unknown command".to_string())),
             };
