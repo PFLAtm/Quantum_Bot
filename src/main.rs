@@ -1,11 +1,11 @@
 use std::{fs::OpenOptions, io::{Read, Write}, process};
 use rand::Rng;
 use serde::Deserialize;
-use serde_json::Value;
 use serde_with::chrono::TimeDelta;
 use serenity::{all::{ ChannelId, CreateAttachment, CreateMessage, Member, Message, Reaction, Ready, Timestamp}, async_trait, prelude::*};
 
 
+mod status;
 
 
 
@@ -134,14 +134,8 @@ impl EventHandler for Handler{
                 },
 
                 "status" => {
-                    let mut res = String::new();
-                    for ip in self.data.server_ip.iter() {
-                        let raw_json:Value = serde_json::from_str(&reqwest::get(format!("{}{}",STATUS_URL,ip)).await.expect("status api call failed").text().await.unwrap()).expect("json parse failed");
-                        let name = raw_json["motd"]["clean"].to_string();
-                        res.push_str(&format!("### {}\nstatus: {}\nplayers: {}\n",&name[2..name.len()-2],if raw_json["online"]==true{"online"}else{"offline"},raw_json["players"]["online"]));
-                    }
-                    Some(msg.channel_id.say(ctx.http, res))
-                    
+                    self.status(ctx,msg).await;
+                    None
                 },
 
                 "avatar" => {
