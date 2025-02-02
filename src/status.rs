@@ -1,5 +1,5 @@
 use serde_json::Value;
-use serenity::all::{Context, CreateEmbed, CreateEmbedFooter, CreateMessage, Embed, Message};
+use serenity::all::{Context, CreateEmbed, CreateEmbedFooter, CreateMessage, Message};
 
 
 

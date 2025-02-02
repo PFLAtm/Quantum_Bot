@@ -6,6 +6,7 @@ use serenity::{all::{ ChannelId, CreateAttachment, CreateMessage, Member, Messag
 
 
 mod status;
+mod embedds;
 
 
 
@@ -152,6 +153,11 @@ impl EventHandler for Handler{
                 "stop" if has_permission => {
                     println!("stopping...");
                     process::exit(0)
+                },
+
+                "send_welcome" if has_permission => {
+                    embedds::send_welcome(msg, ctx).await;
+                    None
                 },
                 "" => None,
 
