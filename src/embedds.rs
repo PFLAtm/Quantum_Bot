@@ -20,3 +20,15 @@ let msg = msg
     .send_message(&ctx.http, message)
     .await.unwrap();
 }
+
+pub async fn send_info(msg:Message, ctx:Context){
+    let embed = CreateEmbed::default()
+        .title("Server Info")
+        .fields(vec![
+            ("Rules", "No duping of any items except: TNT, Gravity blocks, Carpet, String, Rails, Elytras, Sponges \n Don't use the /player command on actuall members \n Dont touch any farms, trenchers or similar without knowing how to use or repair them \n Name Carpet bots after what they are loading (for example, name the bot 13WideTrencher and not sex_on_a_trench or d4",false),
+            ("Servers", "**IP:                      Server Version:  18.2 \n SMP:                 Andrey2006.go.ro:25565 \n CMP:                Andrey2006.go.ro:25566 \n Copy:               Andrey2006.go.ro:25567 \n 1.20.4 CMP:   Andrey2006.go.ro:25568 \n\n Seed:              -6042349440058724837** ",false),
+        ]);
+
+    let message = CreateMessage::default().add_embed(embed);
+    let msg = msg.channel_id.send_message(&ctx.http, message).await.unwrap();
+}

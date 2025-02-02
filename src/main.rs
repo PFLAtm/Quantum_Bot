@@ -159,6 +159,11 @@ impl EventHandler for Handler{
                     embedds::send_welcome(msg, ctx).await;
                     None
                 },
+
+                "send_info" if has_permission => {
+                    embedds::send_info(msg, ctx).await;
+                    None
+                }
                 "" => None,
 
                 _ => Some(msg.channel_id.say(ctx.http,"unknown command".to_string())),
