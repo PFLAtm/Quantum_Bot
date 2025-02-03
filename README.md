@@ -23,6 +23,7 @@ arguments have to be seperated by a space
 
 - adds reaction roles
 - welcomes new members and gives a link to a specified channel
+- embedd builder soontm
 
 ### setup
 
