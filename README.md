@@ -1,6 +1,6 @@
 # Quantum Discord Bot
 
-this Bot is currently under development and lacks a lot features atm
+this Bot is currently under development and lacks a lot features
 
 ## features
 
