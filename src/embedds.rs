@@ -10,7 +10,7 @@ use serenity::{all::{ ChannelId, Colour, CreateAttachment, CreateEmbed, CreateMe
 pub async fn send_welcome(msg:Message, ctx:Context){
 let embed = CreateEmbed::default()
     .title("Quantum")
-    .description("Quantum is a technical Minecraft server, launched on 5/9/2024, running on version 1.18.2. While we focus on pushing the limits of the game, our real mission is to create a thriving, supportive family. At Quantum, we believe in growth, both as players and as people. We’re here to help you unlock your full potential, share knowledge, and inspire each other every step of the way. Join us, and together we’ll break boundaries, build lasting connections, and achieve something truly extraordinary.")
+    .description("Quantum is a technical Minecraft server, launched on 10th April 2024, running on version 1.18.2. While we focus on pushing the limits of the game, our real mission is to create a thriving, supportive family. At Quantum, we believe in growth, both as players and as people. We’re here to help you unlock your full potential, share knowledge, and inspire each other every step of the way. Join us, and together we’ll break boundaries, build lasting connections, and achieve something truly extraordinary.")
     .color(Colour::new(0x623092))
     .timestamp(Timestamp::now())
     .fields(vec![
