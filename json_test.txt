@@ -1,0 +1,46 @@
+{
+  "author": {
+    "name": "Info",
+    "url": "https://example.com"
+  },
+  "title": "Example Title",
+  "url": "https://example.com",
+  "description": "This is an example description. Markdown works too!\n\nhttps://automatic.links\n> Block Quotes\n```\nCode Blocks\n```\n*Emphasis* or _emphasis_\n`Inline code` or ``inline code``\n[Links](https://example.com)\n<@123>, <@!123>, <#123>, <@&123>, @here, @everyone mentions\n||Spoilers||\n~~Strikethrough~~\n**Strong**\n__Underline__",
+  "fields": [
+    {
+      "name": "Field Name",
+      "value": "This is the field value."
+    },
+    {
+      "name": "The first inline field.",
+      "value": "This field is inline.",
+      "inline": true
+    },
+    {
+      "name": "The second inline field.",
+      "value": "Inline fields are stacked next to each other.",
+      "inline": true
+    },
+    {
+      "name": "The third inline field.",
+      "value": "You can have up to 3 inline fields in a row.",
+      "inline": true
+    },
+    {
+      "name": "Even if the next field is inline...",
+      "value": "It won't stack with the previous inline fields.",
+      "inline": true
+    }
+  ],
+  "image": {
+    "url": "https://cubedhuang.com/images/alex-knight-unsplash.webp"
+  },
+  "thumbnail": {
+    "url": "https://dan.onl/images/emptysong.jpg"
+  },
+  "color": 255,
+  "footer": {
+    "text": "Example Footer",
+    "icon_url": "https://slate.dan.onl/slate.png"
+  }
+}

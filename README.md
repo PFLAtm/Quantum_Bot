@@ -17,7 +17,7 @@ arguments have to be seperated by a space
 - timeout: timeouts the sender for 5 min
 - status: prints the status of the configured servers
 - avatar: sends the head of the specified player skin
-- new-ms: temporary joke command
+- send-embedd: sends and embedd created from the provided json representation
 
 ### other features
 

@@ -7,6 +7,8 @@ use serenity::{all::{ ChannelId, CreateAttachment, CreateMessage, Member, Messag
 
 mod status;
 mod embedds;
+#[cfg(test)]
+mod tests;
 
 
 
@@ -19,11 +21,11 @@ const HELP:&'static str =
 - echo: repeats the given argument
 - joke: prints a (hopefully) funny joke
 - help: shows this text
-- timeout: puts user in 5min timeout
-- new-ms: reminds CA that a new ms has to be build
+- timeout: for when you need to take a little break ;)
 - copypasta: prints random copypasta
 - status: prints quantum server status
 - avatar: prints the head of the specified player skin
+- send-embedd: sends an embedd created from the provided json in this channel
 ";
 
 const DEFAULT_DATA:&'static str =
@@ -111,7 +113,8 @@ impl EventHandler for Handler{
 
                 "echo" => Some(msg.channel_id.say(ctx.http,"insufficient permisions".to_string())),
 
-                "new-ms" => Some(msg.channel_id.say(ctx.http,"<@1166088970279583874> when can we build new ms? \n -block on block".to_string())),
+                "new-ms" => Some(msg.channel_id.say(ctx.http, "deprecated :(".to_string())),
+                    //Some(msg.channel_id.say(ctx.http,"<@1166088970279583874> when can we build new ms? \n -block on block".to_string())),
 
                 "copypasta" => Some(msg.channel_id.say(ctx.http,self.data.copypasta[rand::thread_rng().gen_range(0..self.data.copypasta.len())].to_string())),
 
@@ -152,18 +155,36 @@ impl EventHandler for Handler{
 
                 "stop" if has_permission => {
                     println!("stopping...");
+                    msg.channel_id.say(&ctx.http, "stopping...").await.unwrap();
                     process::exit(0)
                 },
 
-                "send_welcome" if has_permission => {
+                "send-welcome" if has_permission => {
                     embedds::send_welcome(msg, ctx).await;
                     None
                 },
 
-                "send_info" if has_permission => {
+                "send-info" if has_permission => {
                     embedds::send_info(msg, ctx).await;
                     None
-                }
+                },
+
+                // "count" => {
+                //     Some(msg.channel_id.say(ctx.http, format!("ARGS: {}",args) ))
+                // },
+
+                "send-embedd" if has_permission=> {
+                    if args == "" {
+                       Some(msg.channel_id.say(ctx.http, "create the embedd on this website https://embed.dan.onl/ and paste the json output as argument to this command".to_string()))
+                    } else {
+                        msg.delete(&ctx.http).await.unwrap();
+                        embedds::send_embedd(msg.clone(), ctx, embedds::embedd_from_json(&args)).await;
+                        None
+                    }
+                },
+
+                "send-embedd" => Some(msg.channel_id.say(ctx.http,"insufficient permisions".to_string())),
+
                 "" => None,
 
                 _ => Some(msg.channel_id.say(ctx.http,"unknown command".to_string())),
@@ -242,3 +263,5 @@ async fn main() {
         println!("reason for Error:{e}");
     }
 }
+
+

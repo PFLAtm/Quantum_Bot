@@ -1,6 +1,11 @@
-use std::thread::Builder;
 
+use std::{fs, ops::Index, usize};
+
+use rand::seq::index;
 use serenity::{all::{ ChannelId, Colour, CreateAttachment, CreateEmbed, CreateMessage, Member, Message, Reaction, Ready, Timestamp}, async_trait, builder, model::colour, prelude::*};
+
+
+
 
 pub async fn send_welcome(msg:Message, ctx:Context){
 let embed = CreateEmbed::default()
@@ -15,7 +20,7 @@ let embed = CreateEmbed::default()
     .thumbnail("https://cdn.discordapp.com/attachments/1230960828551925850/1335615583076618310/icon-1.png?ex=67a0d071&is=679f7ef1&hm=d856588a39b6bc30955ccd75f4d3d7d921c6b0435e3c7727362fffb54498ecc9&");
     
 let message = CreateMessage::default().add_embed(embed);
-let msg = msg
+msg
     .channel_id
     .send_message(&ctx.http, message)
     .await.unwrap();
@@ -31,5 +36,47 @@ pub async fn send_info(msg:Message, ctx:Context){
         ]);
 
     let message = CreateMessage::default().add_embed(embed);
-    let msg = msg.channel_id.send_message(&ctx.http, message).await.unwrap();
+    msg.channel_id.send_message(&ctx.http, message).await.unwrap();
+    
+}
+
+pub fn embedd_from_json(json: &str) -> CreateEmbed {
+    // let json_string = fs::read_to_string(path).unwrap();
+    let mut json_string = json.to_string();
+
+    // for line in json_string.lines() {
+    //     if line.contains("color") {
+    //         let mut colorcode = line.split_once("#").unwrap().1;
+    //         colorcode = colorcode.split_once("\"").unwrap().0;
+    //         let index = json_string.find("color").unwrap();
+    //         
+    //     }
+    // }
+   
+    for line in json_string.clone().lines()  {
+        if line.contains("\"color\": ") {
+            let mut colorcode = line.split_once("#").unwrap().1;
+            colorcode = colorcode.split_once("\"").unwrap().0;
+            let index = json_string.find("\"color\": ").unwrap();
+            
+            json_string.replace_range(index-1..index+20, format!("\"color\": {},",i64::from_str_radix(colorcode, 16).unwrap()).as_str());
+        }
+
+        if line.contains("\"timestamp\": "){
+            let index = json_string.find("\"timestamp\": ").unwrap();
+            json_string.insert_str(index+1, "nuh uh");
+        }
+
+    }
+
+
+    let embedd:CreateEmbed = serde_json::from_str(&json_string).unwrap();
+    embedd
+}
+
+pub async fn send_embedd(msg:Message, ctx: Context, em: CreateEmbed) {
+    let message = CreateMessage::default().add_embed(em);
+
+    msg.channel_id.send_message(&ctx.http, message).await.unwrap();
+
 }
